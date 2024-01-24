@@ -1,6 +1,7 @@
 ﻿using egitimportaliBE.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 
@@ -55,6 +56,28 @@ namespace egitimportaliBE.Controllers
             SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("EPCon").ToString());
             Response response = dal.updateProfile(users,connection);
             return response;
+        }
+
+        [HttpGet]
+        [Route("getUsers")]
+        public JsonResult GetUsers()
+        {
+            string query = "select * from Users";
+            DataTable table = new DataTable();
+            string sqlDataSource = _configuration.GetConnectionString("EPCon");
+            SqlDataReader myReader;
+            using (SqlConnection connection = new SqlConnection(sqlDataSource))
+            {
+                connection.Open();
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    myReader = cmd.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    connection.Close();
+                }
+            }
+            return new JsonResult(table);
         }
     }
 }
